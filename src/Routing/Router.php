@@ -85,7 +85,10 @@ final class Router
                 $arguments[] = $payload;
             }
 
-            ($route['action'])(...$arguments);
+            $response = ($route['action'])(...$arguments);
+            if (is_string($response)) {
+                echo $response;
+            }
             $status = http_response_code();
             return is_int($status) ? $status : 200;
         }

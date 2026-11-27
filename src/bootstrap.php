@@ -8,6 +8,7 @@ use MiniFramework\Repositories\JsonCategorieRepository;
 use MiniFramework\Routing\BlogRoutes;
 use MiniFramework\Routing\Router;
 use MiniFramework\Services\ArticleService;
+use MiniFramework\Views\ViewRenderer;
 
 spl_autoload_register(static function (string $class): void {
     $prefix = 'MiniFramework\\';
@@ -26,7 +27,8 @@ $dataDirectory = dirname(__DIR__) . '/data';
 $categories = new JsonCategorieRepository($dataDirectory . '/categories.json');
 $articleRepository = new JsonArticleRepository($dataDirectory . '/articles.json', $categories);
 $articleService = new ArticleService($articleRepository, $categories);
-$articleController = new ArticleController($articleService);
+$viewRenderer = new ViewRenderer(__DIR__ . '/Views');
+$articleController = new ArticleController($articleService, $viewRenderer);
 $router = new Router();
 BlogRoutes::register($router, $articleController);
 

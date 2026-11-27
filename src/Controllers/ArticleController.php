@@ -5,63 +5,76 @@ declare(strict_types=1);
 namespace MiniFramework\Controllers;
 
 use MiniFramework\Services\ArticleService;
+use MiniFramework\Views\ViewRenderer;
 
 final class ArticleController
 {
-    public function __construct(private ArticleService $articles)
-    {
+    public function __construct(
+        private ArticleService $articles,
+        private ViewRenderer $views,
+    ) {
     }
 
-    public function index(): void
+    public function index(): string
     {
-        $articles = $this->articles->lister();
-        require dirname(__DIR__) . '/Views/articles/index.php';
+        return $this->views->render('articles/index', [
+            'articles' => $this->articles->lister(),
+            'title' => 'Articles — Blog',
+        ]);
     }
 
-    public function show(int $id): void
+    public function show(int $id): string
     {
         $article = $this->articles->trouver($id);
         if ($article === null) {
             http_response_code(404);
-            $title = 'Article introuvable';
-            $content = '<h1>Article introuvable</h1>';
-            require dirname(__DIR__) . '/Views/layouts/main.php';
-            return;
+            return $this->views->render('layouts/main', [
+                'title' => 'Article introuvable',
+                'content' => '<h1>Article introuvable</h1>',
+            ]);
         }
 
-        require dirname(__DIR__) . '/Views/articles/show.php';
+        return $this->views->render('articles/show', [
+            'article' => $article,
+            'title' => $article->titre() . ' — Blog',
+        ]);
     }
 
-    public function create(): void
+    public function create(): string
     {
-        $categories = $this->articlesCategories();
-        $errors = [];
-        require dirname(__DIR__) . '/Views/articles/form.php';
+        return $this->renderForm([]);
     }
 
-    public function store(array $input): void
+    /** @param array<string, mixed> $input */
+    public function store(array $input): string
     {
         try {
-            $titre = is_string($input['titre'] ?? null) ? $input['titre'] : '';
-            $contenu = is_string($input['contenu'] ?? null) ? $input['contenu'] : '';
-            $categorieId = filter_var($input['categorie_id'] ?? null, FILTER_VALIDATE_INT);
-            if ($categorieId === false || $categorieId === null || $categorieId < 1) {
+            $title = is_string($input['titre'] ?? null) ? $input['titre'] : '';
+            $content = is_string($input['contenu'] ?? null) ? $input['contenu'] : '';
+            $categoryId = filter_var($input['categorie_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($categoryId === false || $categoryId === null || $categoryId < 1) {
                 throw new \InvalidArgumentException('Veuillez choisir une catégorie valide.');
             }
 
-            $article = $this->articles->creer($titre, $contenu, $categorieId);
+            $article = $this->articles->creer($title, $content, $categoryId);
             header('Location: /articles/' . $article->id(), true, 303);
+            return '';
         } catch (\InvalidArgumentException $exception) {
             http_response_code(422);
-            $errors = [$exception->getMessage()];
-            $categories = $this->articlesCategories();
-            require dirname(__DIR__) . '/Views/articles/form.php';
+            return $this->renderForm([$exception->getMessage()], $input);
         }
     }
 
-    /** @return list<\MiniFramework\Models\Categorie> */
-    private function articlesCategories(): array
+    /** @param list<string> $errors
+     *  @param array<string, mixed> $input
+     */
+    private function renderForm(array $errors, array $input = []): string
     {
-        return $this->articles->listerCategories();
+        return $this->views->render('articles/form', [
+            'categories' => $this->articles->listerCategories(),
+            'errors' => $errors,
+            'old' => $input,
+            'title' => 'Créer un article — Blog',
+        ]);
     }
 }

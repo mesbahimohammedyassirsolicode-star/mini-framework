@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-$title = 'Articles — Blog';
+$title = isset($title) && is_string($title) ? $title : 'Articles — Blog';
 ob_start();
 ?>
 <h1>Articles</h1>

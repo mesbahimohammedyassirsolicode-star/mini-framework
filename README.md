@@ -32,12 +32,15 @@ mini-framework/
 │       │   ├── form.php
 │       │   ├── index.php
 │       │   └── show.php
-│       └── layouts/
-│           └── main.php
+│       ├── layouts/
+│       │   └── main.php
+│       └── ViewRenderer.php       # Rendu contrôlé des templates
 ├── data/
 │   ├── articles.json              # Données persistantes locales
 │   └── categories.json
 ├── tests/
+│   ├── Mvc/
+│   │   └── ModelViewControllerTest.php
 │   ├── Persistence/
 │   │   ├── JsonArticleRepositoryTest.php
 │   │   └── run.php
