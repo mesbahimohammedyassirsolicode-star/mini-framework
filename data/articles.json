@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "titre": "Bienvenue sur le blog",
+        "contenu": "Le routage MVC est opérationnel.",
+        "date_publication": "2026-11-27T09:00:00+00:00",
+        "categorie_id": 1
+    },
+    {
+        "id": 2,
+        "titre": "Comprendre les couches MVC",
+        "contenu": "Model, View, Controller, Service et Router.",
+        "date_publication": "2026-11-27T09:15:00+00:00",
+        "categorie_id": 2
+    }
+]

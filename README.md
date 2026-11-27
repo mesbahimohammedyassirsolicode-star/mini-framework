@@ -15,10 +15,16 @@ mini-framework/
 │   │   ├── Article.php           # Entité principale du blog
 │   │   └── Categorie.php         # Classification des articles
 │   ├── Repositories/
-│   │   ├── ArticleRepository.php # Persistance des articles
-│   │   └── CategorieRepository.php
+│   │   ├── ArticleRepository.php # Contrat de persistance des articles
+│   │   ├── CategorieRepository.php
+│   │   ├── InMemoryArticleRepository.php # Adaptateurs de test
+│   │   ├── InMemoryCategorieRepository.php
+│   │   ├── JsonArticleRepository.php    # Persistance locale JSON
+│   │   └── JsonCategorieRepository.php
 │   ├── Routing/
+│   │   ├── BlogRoutes.php         # Déclare les routes du blog
 │   │   └── Router.php            # Associe URL/méthode HTTP à une action
+│   ├── bootstrap.php              # Autoload et câblage des dépendances
 │   ├── Services/
 │   │   └── ArticleService.php    # Cas d’usage et règles applicatives
 │   └── Views/
@@ -28,11 +34,21 @@ mini-framework/
 │       │   └── show.php
 │       └── layouts/
 │           └── main.php
+├── data/
+│   ├── articles.json              # Données persistantes locales
+│   └── categories.json
+├── tests/
+│   ├── Persistence/
+│   │   ├── JsonArticleRepositoryTest.php
+│   │   └── run.php
+│   └── Routing/
+│       ├── RouterTest.php         # Tests sans framework externe
+│       └── run.php                # Lance les tests du Router
 └── docs/
     └── architecture.md           # Responsabilités et flux détaillés
 ```
 
-Les répertoires définissent les frontières de l’architecture ; les fichiers PHP applicatifs sont à implémenter dans une étape ultérieure.
+Les couches applicatives, le routage et un câblage de démonstration sont implémentés dans `src/`. Le bootstrap utilise des Repositories JSON pour conserver les articles entre les requêtes. Les adaptateurs en mémoire restent disponibles pour les tests.
 
 ## Couches et responsabilités
 
@@ -85,4 +101,10 @@ Pour `GET /articles/42` :
 | `GET` | `/articles/create` | `ArticleController::create()` — formulaire |
 | `POST` | `/articles` | `ArticleController::store()` — création |
 
-Ces routes illustrent le routage, elles ne constituent pas encore une API ni une implémentation fonctionnelle.
+Les routes sont déclarées en PHP avec des callbacks, par exemple `$router->get('/articles/{id}', [$controller, 'show'], 'articles.show')`. Les paramètres de chemin sont transmis à l’action dans l’ordre de déclaration. Pour `POST`, le tableau des données du formulaire est transmis après les paramètres de chemin. Les chemins sont normalisés sans slash final ; la query string est ignorée pour la correspondance.
+
+Les tests de routage sont autonomes et ne requièrent pas de package externe. Depuis PowerShell, exécutez `php -d xdebug.mode=off tests/Routing/run.php`. Ils couvrent la liste, le détail avec paramètre, le formulaire, la création POST, les réponses 404/405 et la génération d’URL nommée.
+
+Pour lancer la démonstration avec le serveur PHP intégré : `php -S 127.0.0.1:8000 -t public public/index.php`. Le processus PHP doit avoir les droits d’écriture sur `data/articles.json` (et le répertoire `data/`). Les catégories de démonstration sont définies dans `data/categories.json`.
+
+Le test de persistance se lance avec `php -d xdebug.mode=off tests/Persistence/JsonArticleRepositoryTest.php`.

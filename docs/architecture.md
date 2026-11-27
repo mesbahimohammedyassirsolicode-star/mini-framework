@@ -22,21 +22,27 @@ src/
 │   └── Categorie.php
 ├── Repositories/
 │   ├── ArticleRepository.php
-│   └── CategorieRepository.php
+│   ├── CategorieRepository.php
+│   ├── InMemoryArticleRepository.php
+│   ├── InMemoryCategorieRepository.php
+│   ├── JsonArticleRepository.php
+│   └── JsonCategorieRepository.php
 ├── Routing/
+│   ├── BlogRoutes.php
 │   └── Router.php
 ├── Services/
 │   └── ArticleService.php
-└── Views/
-    ├── articles/
-    │   ├── form.php
-    │   ├── index.php
-    │   └── show.php
-    └── layouts/
-        └── main.php
+├── Views/
+│   ├── articles/
+│   │   ├── form.php
+│   │   ├── index.php
+│   │   └── show.php
+│   └── layouts/
+│       └── main.php
+└── bootstrap.php
 ```
 
-Cette arborescence est un squelette de conception. Elle ne prétend pas fournir une application exécutable ou des classes déjà implémentées.
+Le point d’entrée `public/index.php` charge `src/bootstrap.php`, qui enregistre l’autoloader, construit les Repositories JSON, injecte le Service dans le Controller puis enregistre les routes de `BlogRoutes`. Les fichiers `data/articles.json` et `data/categories.json` fournissent les données locales. Le processus PHP doit pouvoir écrire dans `data/` pour enregistrer les articles. Les Repositories en mémoire restent utiles aux tests.
 
 ## Responsabilités par couche
 
@@ -110,4 +116,6 @@ La validation serveur reste obligatoire, même si le formulaire effectue aussi u
 | `GET` | `/articles/create` | `ArticleController::create()` | Afficher le formulaire |
 | `POST` | `/articles` | `ArticleController::store()` | Créer un article |
 
-Ces routes sont des exemples de conception, pas des endpoints implémentés.
+Le routage est assuré par `MiniFramework\\Routing\\Router`. Les routes se déclarent en PHP avec `get()`, `post()` ou `add()` en fournissant un chemin et un callable, habituellement un contrôleur et sa méthode. Les paramètres `{id}` sont transmis à l’action dans l’ordre du chemin ; pour POST, le payload est ajouté après les paramètres. `dispatch()` retourne le statut HTTP (200 après action, 404 si le chemin est inconnu, 405 si le chemin existe avec une autre méthode). Les routes nommées peuvent générer leurs URL via `url()`.
+
+Les tests autonomes d’exemple du blog se lancent avec `php tests/Routing/run.php` depuis la racine du projet.
